@@ -5,9 +5,15 @@ const web3 = new Web3();
 
 let erc20tokens;
 
+const CPS_TEST_ADDR = "0x0E3E4BfD5a2572c1E0475029D43Ac0D274466017";
+const CPS_PROD_ADDR = "0xf239fAb41De78533FA974B74d7605f1E68F8772e";
+const CPST_PROD_ADDR = "0x978f6ee1D834704D0B9aFa4318d016Da4f9E6Ad6";
+
 const erc20addrs = [
-  "0xFFAB690958a463EB859B6348279A2F5FDdB8Eba1",
-  "0x60B6a6420e6295eaa7dEa24eb780eC567205ee05",
+    "0xf239fAb41De78533FA974B74d7605f1E68F8772e",
+    "0x978f6ee1D834704D0B9aFa4318d016Da4f9E6Ad6",
+  //"0xFFAB690958a463EB859B6348279A2F5FDdB8Eba1",
+  //"0x60B6a6420e6295eaa7dEa24eb780eC567205ee05",
 ];
 
 const apiKey = 'HN24BDBRSZHRQVDENTQXE4RTZR5KB2UXK8';
@@ -18,10 +24,15 @@ const httpProdBaseUrl = `http://api.etherscan.io/api?apikey=${apiKey}`;
 const httpTestBaseUrl = `http://ropsten.etherscan.io/api?apikey=${apiKey}`;
 
 function setWebProvider(ks){
-  var web3Provider = new HookedWeb3Provider({
-    host: "http://47.88.61.217:8080",
+
+  var jsonRpcUrl = "https://mainnet.infura.io/CsS9shwaAab0z7B4LP2d";
+  var web3Provider = ks?
+      new HookedWeb3Provider({
+    host: jsonRpcUrl,
     transaction_signer: ks
-  });
+  }):
+      new Web3.providers.HttpProvider(jsonRpcUrl)
+  ;
 
   web3.setProvider(web3Provider);
 
@@ -29,6 +40,15 @@ function setWebProvider(ks){
 
   erc20tokens = erc20addrs.map(function (addr) {
     var contract = ERC20Contract.at(addr)
+      if(addr == CPS_TEST_ADDR){
+          return {"address":addr, "contract": contract, "decimals": 8, "symbol": "CPSTest" };
+      }
+      else if(addr == CPS_PROD_ADDR){
+          return {"address":addr, "contract": contract, "decimals": 8, "symbol": "CPS" };
+      }
+      else if(addr == CPST_PROD_ADDR){
+          return {"address":addr, "contract": contract, "decimals": 2, "symbol": "CPST" };
+      }
     return {"address":addr, "contract": contract, "decimals": contract.decimals.call(), "symbol": contract.symbol.call() };
   })
 }
@@ -43,9 +63,18 @@ var padding = function (str, decimals) {
 }
 
 var toRealAmount = function (amount, decimals) {
+
+  if(amount == null || typeof(amount) == 'undefined'){
+      return amount;
+  }
   if(decimals){
     var a = padding(amount, decimals);
-    return a.slice(0, a.length - decimals) + "." + a.slice(a.length - decimals);
+    var ret = a.slice(0, a.length - decimals) + "." + a.slice(a.length - decimals);
+    if(ret.indexOf('.') == 0)ret = "0"+ret;
+    while(ret.length > 0 && ret.endsWith("0") && !ret.endsWith(".0")){
+        ret = ret.slice(0, ret.length-1);
+    }
+    return ret;
   }else{
     return amount/1.0e18;
   }

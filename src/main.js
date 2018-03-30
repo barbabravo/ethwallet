@@ -1,18 +1,24 @@
 import Vue from "vue";
 import _ from "lodash";
-import lightwallet from "eth-lightwallet";
+import lightwallet from "eth-lightwallet-jh";
 import iView from "iview";
 import routes from "./routes";
 import MainLayout from "./layouts/MainLayout.vue";
 import dbUtils from "./dbUtils";
-import web3Utils from "./web3Utils";
 
 Vue.use(iView);
+
+if(location.href.startsWith("file://")) {
+    require('electron-context-menu')({
+        showInspectElement: false,
+        labels: {"cut": "剪切", "copy": "复制", "save": "保存", "paste": "粘贴", "copyLink": "复制链接"}
+    });
+}
 
 const app = new Vue({
   el: "#app",
   data: {
-    currentView: "home",
+    currentView: "wallet",
     globalData: {
       wallet_list: [],
       current_wallet: {}
@@ -23,6 +29,9 @@ const app = new Vue({
     home: routes.home,
     wallet: routes.wallet,
     transaction: routes.transaction,
+      send: routes.send,
+      sendr: routes.sendr,
+      receive: routes.receive,
     history: routes.history
   },
   created() {
@@ -33,9 +42,15 @@ const app = new Vue({
     _.each(address_list, function(address) {
       let serialized_keystore = dbUtils.get(address);
       if (serialized_keystore) {
+          var ks = null;
+          try{
+              ks = lightwallet.keystore.deserialize(dbUtils.get(address))
+          }catch(err){
+
+          }
         wallet = {
           address: address,
-          keystore: lightwallet.keystore.deserialize(dbUtils.get(address))
+          keystore: ks
         };
         _this.globalData.wallet_list.push(wallet);
       }

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="btn-wrapper">
+    <!-- <div class="btn-wrapper">
       <Button class="button" @click="changeNet('TEST')" v-show="net==='PROD'">切换到测试网</Button>
       <Button class="button" @click="changeNet('PROD')" v-show="net==='TEST'">切换到正式网</Button>
-    </div>
+    </div> -->
     <div class="filter-wrapper">
       <i-input v-model="keyword" class="keyword" placeholder="地址">
         <i-select v-model="address" slot="append" class="transfer-wallet-selector" placeholder="选择钱包" @on-change="onWalletChange">
@@ -17,14 +17,14 @@
       <ul class="transaction-list">
         <li class="transaction-item" v-for="transaction in filter_list" v-bind:key="transaction.hash">
           <div class="transaction-wrapper">
-            <h1 class="transaction-title">TRANSACTION</h1>
+            <h3 class="transaction-title" v-text="transaction.hash"></h3>
             <p class="transaction-sub">
-              <span v-text="transaction.from"></span> => <span v-text="transaction.to"></span>
+              <span v-text="transaction.from"></span> => <span v-text="transaction.to?transaction.realto:'创建合约('+transaction.contractAddress+')'"></span>
             </p>
           </div>
           <div class="transaction-token-wrapper">
-            <span class="token-amount" v-text="transaction.value"></span>
-            <span class="token">{{ transaction.contractAddress | translateAddressToToken }}</span>
+            <span class="token-amount" v-text="transaction.amount"></span>
+            <span class="token">{{transaction.symbol}}</span>
           </div>
           <div class="transaction-time-wrapper">{{transaction.timeStamp | formatDate}}</div>
         </li>
@@ -36,13 +36,14 @@
 <script>
 import axios from "axios";
 import _ from 'lodash';
+import BigNumber from 'bignumber.js';
 import MainLayout from "../layouts/MainLayout.vue";
 import web3Utils from "../web3Utils";
 
 export default {
   data() {
     return {
-      net:'TEST',
+      net:'PROD',
       wallet_list: [],
       current_wallet: {},
       keyword: "",
@@ -77,6 +78,7 @@ export default {
         _this.net = net;
       },5);
     },
+    toRealAmount : web3Utils.toRealAmount,
     loadHistory(address) {
       let _this = this,
           requestUrl = `${web3Utils.getHttpBaseUrl(this.net)}&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc`;
@@ -85,7 +87,29 @@ export default {
       axios.get(requestUrl)
         .then(response => {
           _this.transaction_list = response.data.result;
-          _this.filter_list = response.data.result;
+          if(_this.transaction_list && _this.transaction_list.length > 0){
+              _this.transaction_list = _this.transaction_list.map(function (txn) {
+                  var tokens = web3Utils.getErc20Tokens();
+                  txn.symbol = 'ETH';
+                  txn.amount = _this.toRealAmount(txn.value, 18);
+                  txn.realto = txn.to;
+
+                  for(var token_index in tokens){
+                      var token = tokens[token_index];
+
+                      if(txn.to.toLowerCase() == token.address.toLowerCase() && txn.input && txn.input.length >= 10 && txn.input.substring(0, 10) == "0xa9059cbb"){
+                          txn.symbol = token.symbol;
+                          txn.contractAddress = token.address;
+                          txn.realto = "0x"+txn.input.substring(10+24,64+10);
+                          //0xa9059cbb000000000000000000000000a1dacb7d193259724c59a3e497e881089af2decd0000000000000000000000000000000000000000000000000000000005f5e100
+                          var amount = new BigNumber(txn.input.substring(74,74+64),16);
+                          txn.amount = _this.toRealAmount(amount, token.decimals);
+                      }
+                  }
+                  return txn;
+              });
+          }
+          _this.filter_list = _this.transaction_list;
           _this.$Loading.finish();
         })
         .catch(error => {
@@ -147,7 +171,7 @@ export default {
     border: 1px solid #999;
     border-left: 5px solid #ccc;
     background: rgb(90, 84, 110);
-    padding: 0 30px;
+    padding: 0 10px;
     &:nth-child(2n) {
       background: rgb(177, 156, 171);
     }
@@ -160,11 +184,11 @@ export default {
       flex-grow: 1;
       .transaction-title {
         display: inline-flex;
-        font-size: 20px;
+        font-size: 14px;
       }
       .transaction-sub {
         color: #eee;
-        font-size: 10px;
+        font-size: 12px;
         margin-top: 10px;
       }
     }

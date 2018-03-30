@@ -1,17 +1,19 @@
 {
-  "name": "cpscoin",
+  "name": "CPSWallet",
   "description": "electron",
   "version": "0.0.1",
-  "author": "Bluers <bluers.zz@gmail.com>",
+  "author": "https://www.cpscoin.com",
   "main": "main.js",
-  "productName": "cpscoin",
+  "productName": "CPSWallet",
   "scripts": {
     "start": "npm run build && electron .",
     "dev": "webpack-dev-server --inline --hot --target=web",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules --target=electron-renderer",
     "predeploy": "npm run build",
     "deploy": "surge --project . --domain vue-2-simple-routing-example.surge.sh",
-    "pack": "electron-packager . --platform=win32"
+    "pack": "electron-packager . CPSWallet --platform=win32  --overwrite --out=./dist/  --no-prune",
+    "packall": "yarn build && yarn predeploy &&  electron-packager . CPSWallet --asar=true  --platform=win32,darwin,linux --arch=x64  --overwrite --out=./outapp/ --no-prune  --icon CPSWALLETLOGO",
+    "setup": "electron-installer-windows --src outapp/CPSWallet-win32-x64/ --dest outapp/installers/ --icon CPSWALLETLOGO.ico"
   },
   "build": {
     "appId": "com.electron.block",
@@ -43,10 +45,13 @@
     "crypto-js": "^3.1.5",
     "css-loader": "^0.28.10",
     "electron": "^1.8.3",
+    "electron-context-menu": "^0.9.1",
+    "electron-default-menu": "^1.0.1",
     "electron-packager": "^11.1.0",
     "electron-prompt": "^0.5.0",
+    "electron-squirrel-startup": "^1.0.0",
     "elliptic": "^3.1.0",
-    "eth-lightwallet": "^3.0.1",
+    "eth-lightwallet-jh": "^3.0.2",
     "ethereumjs-tx": "^1.3.3",
     "ethereumjs-util": "^5.1.1",
     "file-loader": "^0.11.1",
@@ -73,5 +78,8 @@
     "web3": "0.20.2",
     "webpack": "^2.5.1",
     "webpack-dev-server": "^2.4.5"
+  },
+  "devDependencies": {
+    "electron-installer-windows": "^1.0.2"
   }
 }

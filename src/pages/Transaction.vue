@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="btn-wrapper">
-      <i-button class="button" :class="{'active':method=='transfer'}" @click="changMethod('transfer')">转账</i-button>
-      <i-button class="button" :class="{'active':method=='receive'}" @click="changMethod('receive')">收入</i-button>
+      <i-button class="button" :class="{'active':method=='transfer'}" @click="changMethod('transfer')">发送</i-button>
+      <i-button class="button" :class="{'active':method=='receive'}" @click="changMethod('receive')">收款</i-button>
     </div>
     <div class="filter-wrapper">
     </div>
@@ -15,7 +15,7 @@
           </i-select>
         </div>
         <div class="receive-wallet-qrcode">
-          二维码：<p class="qrcode" id="qrcode"></p>
+          收款二维码：<p class="qrcode" id="qrcode"></p>
         </div>
       </div>
     </div>

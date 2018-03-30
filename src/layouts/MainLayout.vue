@@ -3,28 +3,45 @@
     <div class="sidebar">
       <div class="logobar">
         <a href="/"><img class="logo" src="../assets/logo.png" alt=""></a>
-        <span class="slogan">CPSCOIN</span>
       </div>
       <ul class="menu">
-        <li class="menu-item">
-          <v-link href="/wallet">
+        <li class="menu-item" v-bind:class="{'menu-item-selected': this.$root.currentView == 'wallet','menu-item-normal': this.$root.currentView != 'wallet'}">
+          <v-link href="/wallet" class="menu-item-link">
             <i class="icon iconfont icon-wallet"></i>
             <span class="menu-item-text">钱包</span>
-            <span class="tip" v-text="wallet_list.length"></span>
+            <!-- <span class="tip" v-text="wallet_list.length"></span> -->
           </v-link>
         </li>
-        <li class="menu-item">
-          <v-link href="/transaction">
-            <i class="icon iconfont icon-trade"></i>
-            <span class="menu-item-text">交易</span>
-          </v-link>
-        </li>
-        <li class="menu-item">
-          <v-link href="/history">
+         <!-- <li class="menu-item" v-bind:class="{'menu-item-selected': this.$root.currentView == 'transaction','menu-item-normal': this.$root.currentView != 'transaction'}">
+              <v-link href="/transaction" class="menu-item-link">
+                  <i class="icon iconfont icon-trade"></i>
+                  <span class="menu-item-text">交易</span>
+              </v-link>
+          </li>-->
+          <li class="menu-item" v-bind:class="{'menu-item-selected': this.$root.currentView == 'send','menu-item-normal': this.$root.currentView != 'send'}">
+              <v-link href="/send" class="menu-item-link">
+                  <i class="icon iconfont icon-trade"></i>
+                  <span class="menu-item-text">发送</span>
+              </v-link>
+          </li>
+          <li class="menu-item" v-bind:class="{'menu-item-selected': this.$root.currentView == 'receive','menu-item-normal': this.$root.currentView != 'receive'}">
+              <v-link href="/receive" class="menu-item-link">
+                  <i class="icon iconfont icon-trade"></i>
+                  <span class="menu-item-text">收款</span>
+              </v-link>
+          </li>
+        <li class="menu-item" v-bind:class="{'menu-item-selected': this.$root.currentView == 'history','menu-item-normal': this.$root.currentView != 'history'}">
+          <v-link href="/history" class="menu-item-link">
             <i class="icon iconfont icon-tradelist"></i>
             <span class="menu-item-text">交易历史</span>
           </v-link>
         </li>
+          <li class="menu-item" v-bind:class="{'menu-item-selected': this.$root.currentView == 'sendr','menu-item-normal': this.$root.currentView != 'sendr'}">
+              <v-link href="/sendr" class="menu-item-link">
+                  <i class="icon iconfont icon-trade"></i>
+                  <span class="menu-item-text">已签名交易发送</span>
+              </v-link>
+          </li>
       </ul>
     </div>
     <div class="content">
@@ -67,7 +84,7 @@ export default {
   flex-direction: column;
   width: 200px;
   padding: 20px 0;
-  background: rgb(82, 66, 120);
+  background: #222222;
   color: #fff;
   .logobar {
     display:inline-flex;
@@ -75,8 +92,8 @@ export default {
     justify-content: center;
     width:100%;
     .logo {
-      width: 52px;
-      height: 52px;
+      width: 265px;
+      height: 70px;
     }
     .slogan {
       margin-left: 5px;
@@ -91,16 +108,40 @@ export default {
       font-size: 20px;
       margin: 0 5px;
     }
+      .menu-item-link{
+          display: inline-block;
+          width:100%;
+      }
+      .menu-item-selected{
+          background: rgb(5,139,200);
+      }
+      .menu-item-normal{
+          background: rgb(42,42,42);
+          a{
+              color:rgb(170,170,170);
+          }
+          a:hover{
+              color:rgb(68,69,69);
+          }
+          &:hover {
+              a{
+                  color:rgb(68,69,69);
+              }
+              background: rgb(197,208,208);
+              color:rgb(68,69,69);
+          }
+      }
     .menu-item {
+        margin-top:5px;
       height: 50px;
       color: #ccc;
-      &:hover {
-        color: #fff;
-      }
+        line-height: 50px;
+      /*&:hover {*/
+        /*color: #fff;*/
+      /*}*/
       .tip {
         width: 20px;
         height: 20px;
-        line-height: 20px;
         border-radius: 50%;
         float: right;
         text-align: center;
@@ -114,7 +155,7 @@ export default {
 }
 .content {
   flex-grow: 1;
-  background: rgb(57, 60, 66);
+  background: #222222;
   padding: 30px;
   min-width: 650px;
 }
